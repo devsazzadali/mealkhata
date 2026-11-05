@@ -66,12 +66,21 @@ export default function Onboarding() {
         return;
       }
 
-      // Check existing pending request for same mess
-      const existingList = await apiGet<any[]>("join-requests", {
-        user_id: user.id,
-        mess_id: foundMessId as string,
-        status: "pending",
-      });
+      // Check existing pending request for same mess. This call MUST NOT
+      // throw silently: an earlier version let its failure escape with no
+      // toast at all, so the join button looked dead (live bug 2026-11-05).
+      let existingList: any[];
+      try {
+        existingList = await apiGet<any[]>("join-requests", {
+          user_id: user.id,
+          mess_id: foundMessId as string,
+          status: "pending",
+        });
+      } catch (lookupErr) {
+        console.error("Existing-request lookup error:", lookupErr);
+        toast.error("আগের request যাচাই করা যায়নি — আবার চেষ্টা করুন");
+        return;
+      }
       const existing = existingList[0] ?? null;
 
       if (existing) {

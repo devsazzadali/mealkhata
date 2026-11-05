@@ -219,7 +219,15 @@ export async function listHandler(
   if (!ctx) return err("Unauthorized", 401);
   if (opts.allowSuperOnly && !isSuperAdmin(ctx)) return err("Forbidden", 403);
   const messId = search.get("mess_id");
-  if (messId && !checkMessAccess(ctx, messId)) return err("Forbidden", 403);
+  // Join-request exception (live bug 2026-11-05): a user who has not joined
+  // any mess yet MUST be able to list their OWN pending join requests for
+  // the mess they are asking to join — otherwise the onboarding duplicate
+  // check 403s and the join button dies silently. Only own rows are
+  // visible: the where clause already filters user_id to the caller, and
+  // any other user_id is still blocked by the mess check below.
+  const isOwnJoinRequestList =
+    model === "JoinRequests" && search.get("user_id") === ctx.userId;
+  if (messId && !isOwnJoinRequestList && !checkMessAccess(ctx, messId)) return err("Forbidden", 403);
   const where: Record<string, unknown> = {};
   const skipKeys = new Set(["limit", "order", "ids"]);
   for (const [k, v] of search.entries()) {
@@ -271,11 +279,23 @@ export async function createHandler(model: string, body: Record<string, unknown>
   if (!ctx) return err("Unauthorized", 401);
   const guard = writeGuard(ctx, model);
   if (guard) return guard;
+  // Join-request exception (live bug 2026-11-05): creating a join request
+  // for a mess the caller does not belong to yet is the whole point of
+  // joining, so the mess check below must not block it — but only for the
+  // caller themselves. Force user_id to the caller (a client must never
+  // file a join request on someone else's behalf) and default a missing
+  // status to pending (the column has no DB default; without this the
+  // create fails with a missing-field 400).
+  if (model === "JoinRequests") {
+    body.user_id = ctx.userId;
+    if (!body.status) body.status = "pending";
+  }
   const messId = body.mess_id as string | undefined;
   if (messId && !canAccessMess(ctx, messId)) {
     // Creating a boarder/message/etc for a mess the caller does not belong
-    // to is forbidden, unless the caller is a super admin (checked above).
-    if (!isSuperAdmin(ctx)) return err("Forbidden", 403);
+    // to is forbidden, unless the caller is a super admin (checked above)
+    // or is filing their own join request (handled above).
+    if (!isSuperAdmin(ctx) && model !== "JoinRequests") return err("Forbidden", 403);
   }
   const delegate = (prisma as unknown as Record<string, unknown>)[clientProp(model)] as {
     create: (args: { data: unknown }) => Promise<unknown>;

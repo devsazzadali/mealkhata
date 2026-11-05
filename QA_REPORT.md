@@ -142,3 +142,30 @@ Tests: new `src/test/parent-scoping.test.ts` (8 tests, mocked auth + Prisma, lis
 - GitHub push auth (commit `c22d3d7` + uncommitted changes local only; main untouched).
 - AUTH_SECRET value in host env; Vercel Blob token + package if production uploads are wanted; "bosi bill" = seat rent confirmation (still assumed, labelled in UI).
 - Follow-ups: B3 concurrent-close race (row locking + live concurrency test); B2 create/update/delete paths for MessageReads/NoticeAcks were deliberately left unscoped (only the list path was in scope — a write to another mess's message id is still possible via direct API call, though the UI never does it).
+
+## Join-request live bug — fix 2026-11-05 (deployed site, user report: "Send join request kaj korce na")
+- ROOT CAUSE (proved from code, not guessed): B2 mess scoping blocked the whole
+  join flow for a user with no mess yet. (1) Onboarding duplicate check
+  `GET /api/join-requests?user_id=self&mess_id=...&status=pending` hit
+  `listHandler` 403 (`checkMessAccess` false for a messless caller), and that
+  call had NO try/catch in `Onboarding.tsx`, so the 403 escaped with no toast
+  at all — button just stopped, looking dead. (2) Even past that, `POST
+  /api/join-requests` would 403 the same way in `createHandler`. (3) Stacked
+  on top: `JoinRequests.status` had no DB default and the client sends no
+  status, so the create would 400 with a missing-field error anyway.
+- FIX (src/lib/api-server.ts): list allows a JoinRequests list ONLY when
+  `user_id` in the query is the caller themself (where clause already
+  restricts to own rows); create allows JoinRequests for a mess the caller
+  does not belong to, but forces `body.user_id = ctx.userId` (spoof-proof)
+  and defaults missing `status` to `pending`. All other models unchanged.
+- FIX (src/views/Onboarding.tsx): duplicate-check GET wrapped in try/catch —
+  on failure it now toasts "আগের request যাচাই করা যায়নি — আবার চেষ্টা করুন"
+  instead of dying silently.
+- FIX (prisma/schema.prisma): `JoinRequests.status @default(pending)`.
+- TESTS: new src/test/join-requests.test.ts, 7 tests PASS (own list 200,
+  other-user list 403, B2 Deposits regression 403, own create 201 with
+  status pending, spoofed user_id forced to caller, B2 create regression
+  403). Full suite 44/44, tsc 0, build PASS, validate PASS.
+- LIVE FOLLOW-UP STILL NEEDED: fix must reach Vercel (push to GitHub main +
+  redeploy) and the schema default needs `prisma db push` to the live Neon
+  DB; then re-test the join flow on the live URL.

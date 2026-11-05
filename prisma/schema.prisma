@@ -278,7 +278,7 @@ model JoinRequests {
   requested_name String
   requested_phone String
   rules_accepted Boolean @default(false)
-  status JoinRequestStatus
+  status JoinRequestStatus @default(pending)
   user_id String
   @@index([mess_id])
   @@map("join_requests")
