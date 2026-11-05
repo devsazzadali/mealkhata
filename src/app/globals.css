@@ -1,0 +1,160 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* MealKhata Design System
+   Emerald + Slate, glassmorphism, premium SaaS look.
+   All colors HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 150 30% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 158 64% 40%;          /* emerald-600 */
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 152 76% 56%;     /* emerald-400 */
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 158 64% 95%;
+    --accent-foreground: 158 64% 25%;
+
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 20% 90%;
+    --input: 215 20% 90%;
+    --ring: 158 64% 40%;
+
+    --radius: 0.85rem;
+
+    /* Brand gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(158 64% 40%), hsl(152 76% 56%));
+    --gradient-hero: linear-gradient(135deg, hsl(158 64% 40%) 0%, hsl(173 80% 40%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(150 30% 98%), hsl(150 30% 95%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100% / 0.9), hsl(150 30% 98% / 0.7));
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px hsl(222 47% 11% / 0.05);
+    --shadow-md: 0 4px 12px -2px hsl(158 64% 40% / 0.12);
+    --shadow-lg: 0 12px 32px -8px hsl(158 64% 40% / 0.18);
+    --shadow-glow: 0 0 40px hsl(152 76% 56% / 0.35);
+
+    /* Glass */
+    --glass-bg: hsl(0 0% 100% / 0.6);
+    --glass-border: hsl(0 0% 100% / 0.4);
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 18%;
+    --sidebar-primary: 158 64% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 158 64% 96%;
+    --sidebar-accent-foreground: 158 64% 25%;
+    --sidebar-border: 215 20% 92%;
+    --sidebar-ring: 158 64% 40%;
+
+    --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark {
+    --background: 222 47% 7%;
+    --foreground: 210 40% 96%;
+
+    --card: 222 40% 11%;
+    --card-foreground: 210 40% 96%;
+
+    --popover: 222 40% 11%;
+    --popover-foreground: 210 40% 96%;
+
+    --primary: 152 76% 50%;
+    --primary-foreground: 222 47% 7%;
+    --primary-glow: 152 76% 60%;
+
+    --secondary: 217 32% 17%;
+    --secondary-foreground: 210 40% 96%;
+
+    --muted: 217 32% 15%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 158 50% 18%;
+    --accent-foreground: 152 76% 70%;
+
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 55%;
+    --warning-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 217 32% 20%;
+    --input: 217 32% 20%;
+    --ring: 152 76% 50%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(158 64% 40%), hsl(152 76% 56%));
+    --gradient-hero: linear-gradient(135deg, hsl(158 64% 35%) 0%, hsl(173 80% 35%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(222 47% 7%), hsl(222 47% 9%));
+    --gradient-card: linear-gradient(145deg, hsl(222 40% 13% / 0.9), hsl(222 40% 10% / 0.7));
+
+    --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.4);
+    --shadow-md: 0 4px 12px -2px hsl(0 0% 0% / 0.4);
+    --shadow-lg: 0 12px 32px -8px hsl(0 0% 0% / 0.5);
+    --shadow-glow: 0 0 40px hsl(152 76% 50% / 0.25);
+
+    --glass-bg: hsl(222 40% 13% / 0.6);
+    --glass-border: hsl(217 32% 25% / 0.5);
+
+    --sidebar-background: 222 47% 9%;
+    --sidebar-foreground: 210 40% 90%;
+    --sidebar-primary: 152 76% 50%;
+    --sidebar-primary-foreground: 222 47% 7%;
+    --sidebar-accent: 217 32% 15%;
+    --sidebar-accent-foreground: 152 76% 70%;
+    --sidebar-border: 217 32% 18%;
+    --sidebar-ring: 152 76% 50%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  html { -webkit-tap-highlight-color: transparent; }
+}
+
+@layer components {
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid var(--glass-border);
+  }
+  .gradient-primary { background: var(--gradient-primary); }
+  .gradient-hero { background: var(--gradient-hero); }
+  .gradient-card { background: var(--gradient-card); }
+  .text-gradient {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .shadow-glow { box-shadow: var(--shadow-glow); }
+}

@@ -1,0 +1,495 @@
+// Migrated from the legacy backend types (see MIGRATION_PRISMA_NEON.md).
+// Relations, defaults, and date-vs-datetime were verified by successful
+// prisma db push runs (2026-11-03 and 2026-11-04); the schema below is the
+// live schema, not a draft.
+// This schema is for Neon PostgreSQL. Set DATABASE_URL in .env (Neon pooled URL) and DIRECT_URL (Neon direct URL).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum AppRole {
+  super_admin
+  mess_admin
+  meal_manager
+  bazar_manager
+  fine_manager
+  mess_monitor
+  boarder
+}
+
+enum FineStatus {
+  pending
+  approved
+  rejected
+  waived
+}
+
+enum BillSplitMethod {
+  equal
+  meal_ratio
+}
+
+enum BoarderStatus {
+  active
+  inactive
+  left
+}
+
+enum JoinRequestStatus {
+  pending
+  approved
+  rejected
+}
+
+enum MessStatus {
+  active
+  suspended
+  trial
+}
+
+enum MonthlyBillStatus {
+  unpaid
+  partial
+  paid
+}
+
+enum PaymentMethod {
+  cash
+  bkash
+  nagad
+  bank
+}
+
+enum StockTxnType {
+  in
+  out
+}
+
+enum StockUnit {
+  kg
+  litre
+  piece
+  gram
+  packet
+}
+
+model Advertisements {
+  active Boolean
+  body String?
+  created_at DateTime @default(now())
+  created_by String
+  id String @id @default(uuid())
+  image_url String?
+  link_url String?
+  mess_id String
+  title String
+  @@index([mess_id])
+  @@map("advertisements")
+}
+
+model BazarSchedule {
+  boarder_id String
+  boarder_id2 String?
+  created_at DateTime @default(now())
+  done Boolean
+  id String @id @default(uuid())
+  mess_id String
+  notes String?
+  schedule_date DateTime @db.Date
+  @@unique([mess_id, boarder_id, schedule_date])
+  @@index([mess_id])
+  @@map("bazar_schedule")
+}
+
+model Boarders {
+  balance Float
+  created_at DateTime @default(now())
+  full_name String
+  guardian_name String?
+  guardian_phone String?
+  id String @id @default(uuid())
+  join_date DateTime @db.Date
+  local_guardian_name String?
+  local_guardian_phone String?
+  nid_or_student_id String?
+  rules_accepted Boolean @default(false)
+  mess_id String
+  monthly_deposit Float
+  notes String?
+  phone String
+  photo_url String?
+  rice_balance Float @default(0)
+  room_id String?
+  seat_number String?
+  status BoarderStatus
+  updated_at DateTime @updatedAt
+  user_id String?
+  @@index([mess_id])
+  @@map("boarders")
+}
+
+model DailyMenus {
+  breakfast String
+  created_at DateTime @default(now())
+  created_by String?
+  dinner String
+  id String @id @default(uuid())
+  lunch String
+  menu_date DateTime @db.Date
+  mess_id String
+  notes String?
+  updated_at DateTime @updatedAt
+  @@unique([mess_id, menu_date])
+  @@index([mess_id])
+  @@map("daily_menus")
+}
+
+model Deposits {
+  amount Float
+  boarder_id String
+  created_at DateTime @default(now())
+  created_by String?
+  deposit_date DateTime @db.Date
+  id String @id @default(uuid())
+  mess_id String
+  method PaymentMethod
+  notes String?
+  reference String?
+  @@index([mess_id])
+  @@map("deposits")
+}
+
+model Events {
+  created_at DateTime @default(now())
+  created_by String
+  description String?
+  event_date DateTime @db.Date
+  event_time String?
+  id String @id @default(uuid())
+  location String?
+  mess_id String
+  title String
+  @@index([mess_id])
+  @@map("events")
+}
+
+model ExpenseCategories {
+  created_at DateTime @default(now())
+  icon String?
+  id String @id @default(uuid())
+  is_default Boolean
+  mess_id String?
+  name String
+  @@index([mess_id])
+  @@map("expense_categories")
+}
+
+model Expenses {
+  amount Float
+  bill_image_url String?
+  category_id String?
+  created_at DateTime @default(now())
+  created_by String?
+  description String?
+  expense_date DateTime @db.Date
+  id String @id @default(uuid())
+  mess_id String
+  @@index([mess_id])
+  @@map("expenses")
+}
+
+model ExtraBills {
+  amount Float
+  bill_date DateTime @db.Date
+  category String?
+  created_at DateTime @default(now())
+  created_by String?
+  id String @id @default(uuid())
+  mess_id String
+  notes String?
+  split_method BillSplitMethod
+  title String
+  updated_at DateTime @updatedAt
+  @@index([mess_id])
+  @@map("extra_bills")
+}
+
+model Feedback {
+  created_at DateTime @default(now())
+  id String @id @default(uuid())
+  mess_id String
+  message String
+  rating Float?
+  status String
+  subject String
+  user_id String
+  @@index([mess_id])
+  @@map("feedback")
+}
+
+model Fines {
+  amount Float
+  approved_by String?
+  basis String?
+  boarder_id String
+  created_at DateTime @default(now())
+  created_by String
+  id String @id @default(uuid())
+  mess_id String
+  month Float
+  notes String?
+  status FineStatus @default(pending)
+  type String
+  updated_at DateTime @updatedAt
+  year Float
+  @@index([mess_id])
+  @@index([boarder_id])
+  @@map("fines")
+}
+
+model GalleryItems {
+  caption String?
+  created_at DateTime @default(now())
+  id String @id @default(uuid())
+  image_url String
+  mess_id String
+  uploaded_by String
+  @@index([mess_id])
+  @@map("gallery_items")
+}
+
+model JoinRequests {
+  created_at DateTime @default(now())
+  decided_at DateTime?
+  decided_by String?
+  id String @id @default(uuid())
+  mess_id String
+  message String?
+  local_guardian_name String?
+  local_guardian_phone String?
+  nid_or_student_id String?
+  requested_name String
+  requested_phone String
+  rules_accepted Boolean @default(false)
+  status JoinRequestStatus
+  user_id String
+  @@index([mess_id])
+  @@map("join_requests")
+}
+
+model MealEntries {
+  boarder_id String
+  breakfast Float
+  created_at DateTime @default(now())
+  created_by String?
+  dinner Float
+  guest Float
+  id String @id @default(uuid())
+  lunch Float
+  meal_date DateTime @db.Date
+  mess_id String
+  updated_at DateTime @updatedAt
+  @@unique([boarder_id, meal_date])
+  @@index([mess_id])
+  @@map("meal_entries")
+}
+
+model MealRequests {
+  boarder_id String
+  breakfast Boolean
+  created_at DateTime @default(now())
+  decided_at DateTime?
+  decided_by String?
+  dinner Boolean
+  guest Float
+  id String @id @default(uuid())
+  lunch Boolean
+  mess_id String
+  note String?
+  request_date DateTime @db.Date
+  status String
+  updated_at DateTime @updatedAt
+  user_id String
+  @@index([mess_id])
+  @@map("meal_requests")
+}
+
+model MessSettings {
+  bank_info String?
+  bkash_number String?
+  created_at DateTime @default(now())
+  default_meal_rate Float
+  join_key String @unique
+  kg_per_meal Float?
+  low_balance_threshold Float
+  mess_id String @id
+  nagad_number String?
+  updated_at DateTime @updatedAt
+  @@map("mess_settings")
+}
+
+model MessageReads {
+  message_id String
+  read_at DateTime
+  user_id String
+
+  @@id([message_id, user_id])
+  @@map("message_reads")
+}
+
+model Messages {
+  content String?
+  created_at DateTime @default(now())
+  id String @id @default(uuid())
+  image_url String?
+  is_pinned Boolean
+  mess_id String
+  sender_id String
+  updated_at DateTime @updatedAt
+  @@index([mess_id])
+  @@map("messages")
+}
+
+model Messes {
+  address String?
+  created_at DateTime @default(now())
+  id String @id @default(uuid())
+  name String
+  phone String?
+  status MessStatus
+  updated_at DateTime @updatedAt
+  @@map("messes")
+}
+
+model MonthlyBills {
+  boarder_id String
+  created_at DateTime @default(now())
+  details Json?
+  extra_share Float
+  generated_by String?
+  id String @id @default(uuid())
+  meal_cost Float
+  meal_rate Float
+  mess_id String
+  month Float
+  paid Float
+  payable Float
+  status MonthlyBillStatus
+  total_deposit Float
+  total_meals Float
+  updated_at DateTime @updatedAt
+  year Float
+  @@unique([mess_id, boarder_id, year, month])
+  @@index([mess_id])
+  @@map("monthly_bills")
+}
+
+model MonthlyPeriods {
+  audit Json?
+  closed_at DateTime?
+  closed_by String?
+  created_at DateTime @default(now())
+  id String @id @default(uuid())
+  locked Boolean @default(false)
+  meal_rate Float
+  mess_id String
+  month Float
+  status String
+  total_deposit Float
+  total_expense Float
+  total_meals Float
+  updated_at DateTime @updatedAt
+  year Float
+  @@unique([mess_id, year, month])
+  @@index([mess_id])
+  @@map("monthly_periods")
+}
+
+model NoticeAcks {
+  acked_at DateTime
+  id String @id @default(uuid())
+  notice_id String
+  user_id String
+  @@unique([notice_id, user_id])
+  @@map("notice_acks")
+}
+
+model Notices {
+  content String
+  created_at DateTime @default(now())
+  created_by String?
+  id String @id @default(uuid())
+  is_emergency Boolean
+  is_pinned Boolean
+  mess_id String
+  title String
+  @@index([mess_id])
+  @@map("notices")
+}
+
+model Profiles {
+  created_at DateTime @default(now())
+  email String @unique
+  full_name String
+  id String @id @default(uuid())
+  mess_id String?
+  passwordHash String
+  phone String @unique
+  photo_url String?
+  updated_at DateTime @updatedAt
+  @@map("profiles")
+}
+
+model Rooms {
+  capacity Float
+  created_at DateTime @default(now())
+  id String @id @default(uuid())
+  mess_id String
+  room_number String
+  @@unique([mess_id, room_number])
+  @@index([mess_id])
+  @@map("rooms")
+}
+
+model StockTransactions {
+  created_at DateTime @default(now())
+  created_by String?
+  id String @id @default(uuid())
+  mess_id String
+  notes String?
+  quantity Float
+  stock_id String
+  txn_type StockTxnType
+  @@index([mess_id])
+  @@map("stock_transactions")
+}
+
+model Stocks {
+  created_at DateTime @default(now())
+  id String @id @default(uuid())
+  low_stock_threshold Float
+  mess_id String
+  name String
+  quantity Float
+  unit StockUnit
+  updated_at DateTime @updatedAt
+  @@index([mess_id])
+  @@map("stocks")
+}
+
+model UserRoles {
+  created_at DateTime @default(now())
+  id String @id @default(uuid())
+  mess_id String?
+  role AppRole
+  user_id String
+  @@unique([user_id, role, mess_id])
+  @@map("user_roles")
+}
